@@ -3,7 +3,7 @@ require_relative 'heap2'
 class PriorityMap
   def initialize(&prc)
     @map = {}
-    @queue = BinaryMinHeap.new(&prc)
+    @queue = BinaryMinHeap.new { |a, b| prc.call(@map[a], @map[b]) }
   end
 
   def [](key)
@@ -11,8 +11,11 @@ class PriorityMap
   end
 
   def []=(key, value)
-    insert(key, value)
-    @map[key] = value
+    if @map.key?(key)
+      update(key, value)
+    else
+      insert(key, value)
+    end
   end
 
   def count
@@ -25,14 +28,9 @@ class PriorityMap
 
   def extract
     key = @queue.extract
-    value = @map[key]
-    # update(key, value)
-    @map.delete(key)
-    [key, value]
-  end
+    value = @map.delete(key)
 
-  def extract!
-    @queue.extract
+    [key, value]
   end
 
   def has_key?(key)
@@ -43,11 +41,13 @@ class PriorityMap
 
   attr_accessor :map, :queue
 
-  def insert(key, _)
-    @queue.push(key) unless @map.key?(key)
+  def insert(key, value)
+    @map[key] = value
+    @queue.push(key)
   end
 
-  def update(key, _)
+  def update(key, value)
+    @map[key] = value
     @queue.reduce!(key)
   end
 end
