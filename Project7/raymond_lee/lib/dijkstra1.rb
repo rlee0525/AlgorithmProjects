@@ -13,7 +13,7 @@ def dijkstra1(source)
 
   until possible_paths.empty?
     current, current_cost = possible_paths.min_by { |_, v| v[:cost] }
-    shortest_paths[current] = possible_paths[current]
+    shortest_paths[current] = current_cost
     possible_paths.delete(current)
     current.out_edges.each do |edge|
       next_vertex = edge.to_vertex
