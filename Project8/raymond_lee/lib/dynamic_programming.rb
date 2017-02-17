@@ -7,6 +7,7 @@ class DPProblems
   def initialize
     @fib_cache = { 1 => 1, 2 => 1 }
     @dist_cache = Hash.new { |hash, key| hash[key] = {} }
+    @maze_cache = Hash.new { |hash, key| hash[key] = {} }
   end
 
   # Takes in a positive integer n and returns the nth Fibonacci number
@@ -151,5 +152,60 @@ class DPProblems
   #             ['x', 'x', ' ', 'x']]
   # and the start is [1, 1], then the shortest escape route is [[1, 1], [1, 2], [2, 2]] and thus your function should return 3.
   def maze_escape(maze, start)
+    ans = maze_escape_helper(maze, start)
+    @maze_cache = Hash.new { |hash, key| hash[key] = {} }
+    ans
+  end
+  def maze_escape_helper(maze, start)
+    return @maze_cache[start[0]][start[1]] if @maze_cache[start[0]][start[1]]
+    # base case
+    if (start[0] == 0 || start[1] == 0) || (start[0] == maze.length - 1 || start[1] == maze[0].length - 1)
+      @maze_cache[start[0]][start[1]] = 1
+      return 1
+    end
+
+    # find all possible places to go
+    x = start[0]
+    y = start[1]
+    adj_spaces = [[x + 1, y], [x - 1, y], [x, y + 1], [x, y - 1]]
+    possible_moves = []
+    adj_spaces.each do |space|
+      if maze[space[0]][space[1]] == ' '
+        possible_moves << space
+      end
+    end
+
+    way_found = false
+    best = maze.length*maze[0].length
+
+    possible_moves.each do |move|
+      temp_maze = make_temp_maze(maze, start)
+      possible_path = maze_escape_helper(temp_maze, move)
+      if possible_path.is_a?(Fixnum) && possible_path < best
+        way_found = true
+        best = possible_path
+      end
+    end
+
+    if way_found
+      @maze_cache[start[0]][start[1]] = best + 1
+      return best + 1
+    else
+      @maze_cache[start[0]][start[1]] = 0.0/0.0
+      return 0.0/0.0
+    end
+  end
+
+  def make_temp_maze(maze, filled_pos)
+    temp_maze = []
+    maze.each_with_index do |row, i|
+      temp_maze << []
+      maze[i].each do |el|
+        temp_maze[i] << el
+      end
+    end
+
+    temp_maze[filled_pos[0]][filled_pos[1]] = 'x'
+    temp_maze
   end
 end
