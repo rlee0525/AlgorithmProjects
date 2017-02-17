@@ -22,7 +22,27 @@ class DPProblems
   # needed to make change for the given amount.  You may assume you have an unlimited supply of each type of coin.
   # If it's not possible to make change for a given amount, return nil.  You may assume that the coin array is sorted
   # and in ascending order.
-  def make_change(amt, coins, coin_cache = {0 => 0})
+  def make_change(amt, coins, coin_cache = { 0 => 0 })
+    return 0.0 / 0.0 if amt < 0
+    return coin_cache[amt] if coin_cache[amt]
+
+    change_found = false
+    answer = Float::INFINITY
+
+    coins.each do |coin|
+      temp = make_change(amt - coin, coins, coin_cache) + 1
+
+      if answer > temp
+        change_found = true
+        answer = temp
+      end
+    end
+
+    if change_found
+      coin_cache[amt] = answer
+    else
+      coin_cache[amt] = 0.0 / 0.0
+    end
   end
 
   # Knapsack Problem: write a function that takes in an array of weights, an array of values, and a weight capacity
@@ -31,6 +51,30 @@ class DPProblems
   # to include are items 0 and 1, whose values are 10 and 4 respectively.  Duplicates are not allowed -- that is, you
   # can only include a particular item once.
   def knapsack(weights, values, capacity)
+    return 0 if capacity == 0 || weights.empty?
+    table = knapsack_table(weights, values, capacity)
+    table[capacity][weights.length - 1]
+  end
+
+  def knapsack_table(weights, values, capacity)
+    table = []
+    (0..capacity).each do |i|
+      table[i] = []
+      (0..weights.length - 1).each do |j|
+        if i == 0
+          table[i][j] = 0
+        elsif j == 0
+          table[i][j] = weights[0] > i ? 0 : values[0]
+        else
+          one = table[i][j - 1]
+          two = i < weights[j] ? 0 : table[i - weights[j]][j - 1] + values[j]
+          max_option = [one, two].max
+          table[i][j] = max_option
+        end
+      end
+    end
+
+    table
   end
 
   # Stair Climber: a frog climbs a set of stairs.  It can jump 1 step, 2 steps, or 3 steps at a time.
