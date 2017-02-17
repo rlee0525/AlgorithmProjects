@@ -6,6 +6,7 @@
 class DPProblems
   def initialize
     @fib_cache = { 1 => 1, 2 => 1 }
+    @dist_cache = Hash.new { |hash, key| hash[key] = {} }
   end
 
   # Takes in a positive integer n and returns the nth Fibonacci number
@@ -108,6 +109,38 @@ class DPProblems
   # str2.  Allowed operations are deleting a character ("abc" -> "ac", e.g.), inserting a character ("abc" -> "abac", e.g.),
   # and changing a single character into another ("abc" -> "abz", e.g.).
   def str_distance(str1, str2)
+    ans = str_distance_helper(str1, str2)
+    @dist_cache = Hash.new { |hash, key| hash[key] = {} }
+    ans
+  end
+
+  def str_distance_helper(str1, str2)
+    return @dist_cache[str1][str2] if @dist_cache[str1][str2]
+    if str1 == str2
+      @dist_cache[str1][str2] = 0
+      return 0
+    end
+
+    if str1.nil?
+      return str2.length
+    elsif str2.nil?
+      return str1.length
+    end
+
+    len1 = str1.length
+    len2 = str2.length
+    if str1[0] == str2[0]
+      dist = str_distance_helper(str1[1..len1], str2[1..len2])
+      @dist_cache[str1][str2] = dist
+      return dist
+    else
+      poss1 = 1 + str_distance_helper(str1[1..len1], str2[1..len2])
+      poss2 = 1 + str_distance_helper(str1, str2[1..len2])
+      poss3 = 1 + str_distance_helper(str1[1..len1], str2)
+      dist = [poss1, poss2, poss3].min
+      @dist_cache[str1][str2] = dist
+      dist
+    end
   end
 
   # Maze Traversal: write a function that takes in a maze (represented as a 2D matrix) and a starting
