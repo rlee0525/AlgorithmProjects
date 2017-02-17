@@ -83,6 +83,25 @@ class DPProblems
   # NB: this is similar to, but not the same as, make_change.  Try implementing this using the opposite
   # DP technique that you used in make_change -- bottom up if you used top down and vice versa.
   def stair_climb(n)
+    ways = [[[]], [[1]], [[1, 1], [2]]]
+
+    return ways[n] if n < 3
+
+    (3..n).each do |i|
+      new_way_set = []
+      (1..3).each do |first_step|
+        ways[i - first_step].each do |way|
+          new_way = [first_step]
+          way.each do |step|
+            new_way << step
+          end
+          new_way_set << new_way
+        end
+      end
+      ways << new_way_set
+    end
+
+    ways.last
   end
 
   # String Distance: given two strings, str1 and str2, calculate the minimum number of operations to change str1 into
